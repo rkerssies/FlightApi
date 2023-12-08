@@ -1,0 +1,18 @@
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} -s [OR]
+RewriteCond %{REQUEST_FILENAME} -l [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^.*$ - [NC,L]
+RewriteRule ^.*$ index.php [NC,L]
+
+
+#RewriteEngine On
+#RewriteCond %{REQUEST_FILENAME} !-f
+#RewriteCond %{REQUEST_FILENAME} !-d
+#RewriteRule ^(.*)$ index.php [QSA,L]
+
+# rewrites default from clean URL to get-values
+# RewriteRule ^([^/]+)/([^/]+)/([^/.]+)/([^\.]+)/?$ ./index.php?table=$1&p1=$2&p2=$3&p3=$4 [L,NC,QSA]
+# RewriteRule ^([^/]+)/([^/]+)/([^\.]+)/?$ ./index.php?table=$1&p1=$2&p2=$3 [L,NC,QSA]
+# RewriteRule ^([^/]+)/([^\.]+)/?$ ./index.php?table=$1&p1=$2 [L,NC,QSA]
+# RewriteRule ^([^\.]+)/?$        ./index.php?table=$1 [L,NC,QSA]
