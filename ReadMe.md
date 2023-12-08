@@ -15,9 +15,9 @@ You can easelly add your own routes, custom sql-queries and data-validation, rol
 ### Some impressions
 Below are some PostMan screenshots that giev an impression of how te json-responses.
 
-<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/01-get-token.png" width="30%" style="margin-right:10px;"> 
-<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/02-find-by-id.png" width="30%" style="margin-right:10px;"> 
-<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/03-related-sql.png" width="30%" style="margin-right:10px;">
+<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/01-get-token.png" width="30%" style="margin-right:10px;float:left;"> 
+<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/02-find-by-id.png" width="30%" style="margin-right:10px;float:left;"> 
+<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/03-related-sql.png" width="30%" style="margin-right:10px;float:left;">
 
 
 ## Installation and configuration
