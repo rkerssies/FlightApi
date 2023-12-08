@@ -13,7 +13,7 @@ You can easelly add your own routes, custom sql-queries and data-validation, rol
 - PHP PDO 
 
 ### Some impressions
-Below are some PostMan screenshots that giev an impression of how te json-responses.
+Below are some PostMan screenshots that give an impression of how te json-responses.
 
 <img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/01-get-token.png" width="30%" style="margin-right:10px;display:block;float:left;"> 
 <img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/02-find-by-id.png" width="30%" style="margin-right:10px;display:block;float:left;"> 
