@@ -1,0 +1,15 @@
+
+create projectfolder
+composer require mikecao/flight
+
+create .htaccess
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php [QSA,L]
+
+create public/index.php
+
+
+
+create core/FlightApi.php

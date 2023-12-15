@@ -13,7 +13,7 @@
 		],
 		'users' => [    // table-name and it's fields and its field-validation
 			'name'  => ['required','string' ],
-			'email'  => ['required','string' ],
+			'email'  => ['required','string', 'email' ],
 			'password'  => ['required','string' ],
 
 		],
