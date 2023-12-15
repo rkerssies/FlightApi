@@ -18,7 +18,7 @@ Below are some PostMan screenshots that give an impression of how te json-respon
 <img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/01-get-token.png" width="30%" style="margin-right:10px;display:block;float:left;"> 
 <img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/02-find-by-id.png" width="30%" style="margin-right:10px;display:block;float:left;"> 
 <img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/03-related-sql.png" width="30%" style="margin-right:10px;display:block;float:left;">
-
+   
   
 ## Installation and configuration
 * Pull the project from GitHub; [FlightAPI]( 'https://github.com/rkerssies/FlightApi' )
