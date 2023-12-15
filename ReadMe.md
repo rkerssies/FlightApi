@@ -114,7 +114,7 @@ An example of this file is shown below:
 ```
 This means that a user with the role `user` is allowed to access:<br>
 beers-all, beers-find and bars-totals.<br>
-Beers is a one-on-one wuth a database-table-name. 
+Beers is a one-on-one wuth a database-table-name.    
 Bars is a fictive, unique, non-table name defined within a custom-route.  
 
 
