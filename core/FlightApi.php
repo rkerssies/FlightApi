@@ -91,7 +91,7 @@
 			$cleanRequests->cleanPost();
 			$this->request  = (object) [];
 			$this->response = (object) [];
-
+			
 			
 			if($method == 'post' ||$method == 'put' || $method == 'patch'  )
 			{   // validation-object, when data is possibly submitted, eq for actions: 'create' and 'edit'
@@ -99,7 +99,6 @@
 				$table = explode('/',ltrim($pathParts[0], '/'))[0];
 				$this->requestValidation = new FormRequests($validationArray, $table);
 			}
-			
 			
 			$this->request  = (object) // default response-values, ready to overwrite
 			[
@@ -121,10 +120,11 @@
 			$this->response  = (object)  // default response-values, ready to overwrite
 			[
 				'count'         => 0 ,
+				'total'         => null ,      // amount in table (usefull for pagination) with GET
 				// 'affectedrows' => null,
-				'lastinserted'  => null,
-				'token_payload'=>null,
-				'validation'    => []
+				'lastinserted'  =>  null,
+				'token_payload'=>   null,
+				'validation'    =>  []
 			];
 		}
 		
@@ -139,16 +139,30 @@
 				$this->error('Not Found', 404);
 			});
 			
-			// create default json-headers
-			header("Access-Control-Allow-Origin: ".$this->host );
+			// create default json-headers, to enable CORS
+//			header("Access-Control-Allow-Origin: ".$this->host );
+			header("Access-Control-Allow-Origin: *");       // allow all remote domains
 			header("Created-by: ".'InCubics.net (c)'.date('Y')."-".(date('Y')+1) );
 			header("Access-Control-Allow-Methods: *");
-			header("Access-Control-Max-Age: 3600");
+//			header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE, PATCH");
+//			header("Access-Control-Max-Age: 3600");
+			header("Access-Control-Allow-Credentials: true");
 			header("Content-type: application/json");
-			header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authentication, Authorization, X-Requested-With");
+			header("Access-Control-Allow-Headers: Content-Type, Accept, Origin, Access-Control-Allow-Headers,Authorization, Authentication, X-Requested-With");
+			
+			// Handle preflight requests
+			if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+				// If you need to allow cookies or HTTP authentication, set this header
+				header("Access-Control-Allow-Credentials: true");
+				
+				// Respond with 200 OK and exit for preflight OPTIONS requests
+				header("HTTP/1.1 200 OK");
+				exit();
+			}
+			
 			
 			Flight::start();                                // run Flight
-
+			
 			$this->sendRespons();                           // return unified json-response
 		}
 		

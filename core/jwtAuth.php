@@ -29,6 +29,7 @@
 		public $successResponse = false;
 		public $messageResponse = null;
 		public $validation = null;
+		public $permissions = null;
 		public $statusResponse = 400;
 		public $count = 0;
 		
@@ -119,19 +120,22 @@
 						'email' => $this->user,
 						'name'  => $this->name,
 						'roles' => $this->roles,
-						'permissions' => $permissionsArray,
+						'permissions' => $permissionsArray, // make array of permissions available for the Front-end, to be stored in LocalStorage
 					]
 				];
-				
+				$this->permissions = $permissionsArray;     // make array of permissions available for the Front-end
 				$jwt = (new \Firebase\JWT\JWT())->encode($payload, $this->jwtConfig->token_key, $this->jwtConfig->token_encrypt);
 				
 				header("Authorization: Bearer:". $jwt);
 				
 				return [ // return token-response
 					'token' =>'Bearer:'.$jwt,
+					'username' => $this->name,
+					'email'     => $this->user,
 					"issued_at"  => gmdate('Y-m-d H:i:s',$this->jwtConfig->IssuedAT_claim),
 					"not_before" => gmdate('Y-m-d H:i:s',$this->jwtConfig->NotBeFore_claim),
 					"expired_at" => gmdate('Y-m-d H:i:s',$this->jwtConfig->EXPire_claim),
+					'permissions' => $permissionsArray
 				];
 			}
 		}
@@ -179,7 +183,8 @@
 				$this->jwtFail = 'jwt-token provided no valid permission for requested url';
 				return false;
 			}
-			unset($decodedPayload->data->permissions);      // remove list with ALL ALLOWED permissions from response
+//			unset($decodedPayload->data->permissions);      // remove list with ALL ALLOWED permissions from response
+			
 			$this->jwtSuccess = $decodedPayload->data;
 			return true;
 		}

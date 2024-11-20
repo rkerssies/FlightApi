@@ -42,6 +42,7 @@
 			}
 			$this->request->values['paginate']  = $paginate;
 			$this->request->values['page']      = $page;
+			$this->response->total              = $this->db->query('SELECT COUNT(*) as `total` FROM '.strtolower($table))[0]['total'];  // max records in table, useful for calculating the amount of pages with pagination
 
 			$this->dataResponse = $this->db->query('SELECT * FROM '.strtolower($table).' LIMIT '.(($page-1)*$paginate).','.$paginate);// paginate ?
 
@@ -99,6 +100,12 @@
 		$this->request->values['table']     = $table;           // used for RBAC
 		$this->request->values['action']    = "create";         // used for RBAC
 		$this->request->values['rbac']      = $table.'-create'; // used for RBAC
+
+////		$this->statusResponse = 777;
+////		$this->request->post =  json_decode($data);
+//		$this->dataResponse = $this->request->post;
+//		$this->sendRespons();
+//		die;
 		
 		$jwtObj = (new \core\jwtAuth($this->config->jwt, $this->db, $this->host));
 		if(! $jwtObj->checkPermissions($this->request->values['rbac']))
@@ -108,8 +115,9 @@
 		}
 		elseif($this->db->tableExists($table))
 		{
-			if(!empty($jwtObj->jwtSuccess)) { $this->response->token_payload  = $jwtObj->jwtSuccess; }
+			if(!empty($jwtObj->jwtSuccess)) { $this->response->token_payload  = $jwtObj->jwtSuccess;}
 			$validated = $this->requestValidation->validator($this->request->post);
+			
 			if(! $validated)
 			{
 				$this->successResponse  = false;
@@ -123,11 +131,14 @@
 				$valueString='';
 				foreach((array)$this->request->post as $key=>$value)
 				{
-					$keyString.=''.$key.',';
-					$valueString.='"'.$value.'",';
+					$keyString.= "`".$key.'`,';
+					$valueString.="'".$value."',";
 				}
-				$this->dataResponse=$this->db->query('INSERT INTO '.$table.' ('.rtrim($keyString, ',').')
-					VALUES ('.rtrim($valueString, ',').' )');
+				
+				$sql = "INSERT INTO ".$table." (".rtrim($keyString, ',').") VALUES (".rtrim($valueString, ',')." )";
+				
+				
+				$this->dataResponse=$this->db->query($sql);
 				if($this->db->querySucces===true)
 				{
 					$this->successResponse=true;
@@ -139,7 +150,8 @@
 				}
 				else    {
 					$this->dataResponse = false;
-					$this->error('NO record inserted for '.$table, 400);
+					$this->error('NO record inserted for '.$table.'. Precondition failed.', 412);
+					$this->response->validation  = $this->db->error;
 				}
 			}
 		}
@@ -147,9 +159,14 @@
 	
 	
 	
-	
 	Flight::route('PUT /@table/edit/@id:[0-9]+', function($table, $id)
 	{   // EDIT
+	
+//		$this->statusResponse = 777;
+//		$this->dataResponse = (array)$this->request;
+//		$this->sendRespons();
+//		die;
+		
 		$this->request->values['id'] = (int) $id;
 		$this->request->values['table']     = $table;           // used for RBAC
 		$this->request->values['action']    = "edit";           // used for RBAC
@@ -165,21 +182,28 @@
 		{
 			if(!empty($jwtObj->jwtSuccess)) { $this->response->token_payload  = $jwtObj->jwtSuccess; }
 			$validated = $this->requestValidation->validator($this->request->post);
-			if(! $validated)
+			
+			if( ! $validated) // failed
 			{
 				$this->successResponse  = false;
 				$this->messageResponse  = 'validation FAILED on submitted data';
 				$this->response->validation  = $this->requestValidation->fails;
 				$this->statusResponse  = 400;
 			}
-			elseif($validated)
+			elseif($validated) // valid
 			{
 				$setString='';
-				foreach((array)$this->request->put as $key=>$value)
+				foreach((array)$this->request->put as $key=>$value) // PostMan needs "put" and React needs "post"
 				{
-					$setString.='`'.$key.'`="'.$value.'", ';
+					$setString.="`".$key."`='".$value."', ";
 				}
-				$this->dataResponse=$this->db->query('UPDATE '.$table.' SET '.rtrim($setString, ', ').' WHERE id = "'.$id.'"');
+				$sql = "UPDATE `".$table."` SET ".rtrim($setString, ', ')." WHERE `id` = '".$id."'";
+//$this->statusResponse = 777;
+//$this->dataResponse = $sql;
+//$this->sendRespons();
+//die;
+				
+				$this->dataResponse=$this->db->query($sql);
 				if($this->db->querySucces===true)
 				{
 					$this->request->put=(object)array_merge(['id'=>$id], (array)$this->request->put);
