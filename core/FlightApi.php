@@ -64,7 +64,7 @@
 			require_once "../core/validation/ValidationPatterns.php";
 			require_once "../core/validation/FormRequests.php";
 
-			
+	
 			// pdo database-object
 			$this->config =  include "../config/app.php";    // get config
 			$this->db = (new pdoDB());                      // database object
@@ -74,24 +74,24 @@
 			
 			// JWT object
 			$this->jwtAuth = new jwtAuth($this->config->jwt, $this->db, $this->host.Flight::request()->url);
-			
+
 			// some default get-values from request (via Flight)
 			$this->id       = Flight::request()->query['id'];   // get-value from URL
 			$this->paginate = Flight::request()->query['paginate'];
 			$this->page     = Flight::request()->query['page'];
-			
+
 			// build response of get and  post AND-OR put, patch or delete
 			$cleanRequests = new cleanRequests();
 			if(! $cleanRequests->build()) {
 				die('FAILED support on cleaning get and/or post AND creating clean globals for put, patch or delete');
 			}
-			
+
 			$method = $cleanRequests->method;
 			$cleanRequests->cleanGet();
 			$cleanRequests->cleanPost();
 			$this->request  = (object) [];
 			$this->response = (object) [];
-			
+
 			
 			if($method == 'post' ||$method == 'put' || $method == 'patch'  )
 			{   // validation-object, when data is possibly submitted, eq for actions: 'create' and 'edit'
@@ -99,7 +99,7 @@
 				$table = explode('/',ltrim($pathParts[0], '/'))[0];
 				$this->requestValidation = new FormRequests($validationArray, $table);
 			}
-			
+
 			$this->request  = (object) // default response-values, ready to overwrite
 			[
 				'hostname' => Flight::request()->host,
@@ -116,7 +116,7 @@
 					'action'   => null
 				]
 			];
-			
+
 			$this->response  = (object)  // default response-values, ready to overwrite
 			[
 				'count'         => 0 ,
@@ -159,10 +159,9 @@
 				header("HTTP/1.1 200 OK");
 				exit();
 			}
-			
-			
+
 			Flight::start();                                // run Flight
-			
+
 			$this->sendRespons();                           // return unified json-response
 		}
 		
@@ -201,5 +200,4 @@
 			$this->statusResponse = $status;
 			return true;
 		}
-		
 	}

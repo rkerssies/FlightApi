@@ -10,11 +10,12 @@
 		this file contains  GENERIC  API-requests
 	*************************************************** */
 	
-	
 	/*  SELECT some DATA   */
 	
 	Flight::route('GET /@table', function($table)
 	{   ///eq: http://flightapi.rk/beers   or  http://flightapi.rk/beers?paginate=3  or  http://flightapi.rk/beers?paginate=5&page=3
+		/// http://flightapi.rk/beers?related=1 or http://flightapi.rk/beers?page=3&paginate=10&related=1
+
 		$this->request->values['table']  = $table;           // used for RBAC
 		$this->request->values['action'] = 'all';           // used for RBAC
 		$this->request->values['rbac']   = $table."-all";    // used for RBAC
@@ -28,24 +29,40 @@
 		elseif($this->db->tableExists($table))
 		{
 			if(!empty($jwtObj->jwtSuccess)) { $this->response->token_payload  = $jwtObj->jwtSuccess; }
+			
 			// setup pagination needed
 			$paginate = $this->config->noPagination;   // get default limit of paginated
 			if(!empty($this->request->get->paginate) && is_numeric($this->request->get->paginate)) {
 				$paginate = $this->request->get->paginate;
 			}
+			elseif(empty($this->request->get->paginate)) {
+				$paginate = $this->config->defafaultPagination; // using only pages uses the default amount of records to paginate
+			}
 			$page = 1;
 			if(!empty($this->request->get->page) && is_numeric($this->request->get->page)) {
 				$page = $this->request->get->page;
-				if(empty($this->request->get->paginate)) {
-					$paginate = $this->config->defafaultPagination; // using only pages uses the default amount of records to paginate
-				}
 			}
 			$this->request->values['paginate']  = $paginate;
 			$this->request->values['page']      = $page;
 			$this->response->total              = $this->db->query('SELECT COUNT(*) as `total` FROM '.strtolower($table))[0]['total'];  // max records in table, useful for calculating the amount of pages with pagination
-
-			$this->dataResponse = $this->db->query('SELECT * FROM '.strtolower($table).' LIMIT '.(($page-1)*$paginate).','.$paginate);// paginate ?
-
+			
+			
+			// Append response with related-data (on request: index.php?related=1 )
+			if(!empty($this->request->get->related) && is_numeric($this->request->get->related))
+			{
+				if (!in_array($this->request->get->related, [1,2,3])) {
+					$this->dataResponse = ['message' => 'URLkey \'related\' with incorrect max recursive depth. Acceeptehd depth-values are:  1, 2, or 3'];
+				}
+				else    {
+					$this->db->queryParams = ['id' => null, 'page'=> $page, 'paginate' => $paginate];
+					$this->dataResponse =  $this->db->fetchDataRecursive($table, null, null, [], 0, $this->request->get->related);
+					$this->db->queryParams = [];
+				}
+			}
+			else    {
+				$this->dataResponse = $this->db->query('SELECT * FROM '.strtolower($table).' LIMIT '.(($page-1)*$paginate).','.$paginate);// paginate ?
+			}
+			
 			if(is_array($this->dataResponse)) { // empty array; no records found
 				$this->messageResponse      = 'requested records from '.$table.' page '.$page.' of paginated per '.$paginate.' records';
 				$this->statusResponse       = 200;
@@ -58,8 +75,8 @@
 	});
 	
 	
-	Flight::route('GET /@table/@id:[0-9]+', function($table, $id)
-	{   ///eq: http://flightapi.rk/beers/9
+	Flight::route('GET /@table/@id:[0-9]+', function($table, $id = null)
+	{   ///eq: http://flightapi.rk/beers/9   http://flightapi.rk/beers/13?related=3
 		
 		$this->request->values['id']        = (int) $id;
 		$this->request->values['table']     = $table;           // used for RBAC
@@ -72,11 +89,24 @@
 			$this->messageResponse      = $jwtObj->jwtFail;
 			$this->statusResponse       = 403;  // Forbidden, no valid access-rights/permissions
 		}
-		elseif($this->db->query('show table status like "'.$table.'"'))
+		elseif($this->db->tableExists($table))
 		{
 			if(!empty($jwtObj->jwtSuccess)) { $this->response->token_payload  = $jwtObj->jwtSuccess; }
-			$this->dataResponse = $this->db->query('SELECT * FROM '.strtolower($table).' WHERE id = '.$id);
 
+			// Append response with related-data (on request: index.php?related=1 )
+			if (!empty($this->request->get->related) && !in_array($this->request->get->related, [1,2,3]))
+			{
+				$this->dataResponse = ['message' => 'URLkey \'related\' with incorrect max recursive depth. Acceeptehd depth-values are:  1, 2, or 3'];
+			}
+			elseif(!empty($this->request->get->related) && in_array($this->request->get->related, [1,2,3]))
+			{
+				$this->db->queryParams=['id'=>$id, 'page'=>null, 'paginate'=>null];
+				$this->dataResponse=$this->db->fetchDataRecursive($table, null, null, [], 0, $this->request->get->related);
+			}
+			else    {
+				$this->dataResponse = $this->db->query('SELECT * FROM '.strtolower($table).' WHERE id = '.$id);
+			}
+			
 			if(is_array($this->dataResponse) && !empty($this->dataResponse)) {
 				$this->messageResponse      = 'requested record-id '.$id.' from '.$table;
 				$this->statusResponse       = 200;
@@ -86,6 +116,9 @@
 			else    {
 				$this->error('NOT FOUND: record-id '.$id.' NOT found in '.$table, 404);
 			}
+		}
+		else {
+			$this->error('Server error, table doen\'t exist', 500);
 		}
 	});
 	
@@ -156,8 +189,6 @@
 			}
 		}
 	});
-	
-	
 	
 	Flight::route('PUT /@table/edit/@id:[0-9]+', function($table, $id)
 	{   // EDIT
@@ -262,7 +293,6 @@
 			}
 		}
 	});
-	
 	
 	Flight::route('DELETE /@table/trash/@id:[0-9]+', function($table, $id)
 	{   // TRASH

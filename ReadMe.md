@@ -17,7 +17,14 @@ Below are some PostMan screenshots that give an impression of how te json-respon
 
 <img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/01-get-token.png" width="30%" style="margin-right:10px;display:block;float:left;"> 
 <img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/02-find-by-id.png" width="30%" style="margin-right:10px;display:block;float:left;"> 
-<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/03-related-sql.png" width="30%" style="margin-right:10px;display:block;float:left;">
+<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/03-custom-sql.png" width="30%" style="margin-right:10px;display:block;float:left;">
+<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/04-related-sql-all-d3.png" width="30%" style="margin-right:10px;display:block;float:left;">
+<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/04a-related-sql-all-d1.png" width="30%" style="margin-right:10px;display:block;float:left;">
+<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/04b-related-sql all-page-paginated.png" width="30%" style="margin-right:10px;display:block;float:left;">
+<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/04c-related-sql-paged.png" width="30%" style="margin-right:10px;display:block;float:left;">
+<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/5-related-sql-find-id.png" width="30%" style="margin-right:10px;display:block;float:left;">
+<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/06-me-from-token.png" width="30%" style="margin-right:10px;display:block;float:left;">
+<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/07-response-structure.png" width="30%" style="margin-right:10px;display:block;float:left;">
    
   
 ## Installation and configuration
@@ -55,6 +62,8 @@ The build-up of url is:
 `http://MyFlightApi.rk/ <table-name> / <action> `
 or with QSA:
 `http://MyFlightApi.rk/ <table-name> / <action>  ?key1=value1 `
+
+For examples and an expalnation, see ``http://MyFlightApi.rk/about` 
 
 NB: The methods GET, POST, PUT, PATCH and DELETE are supported.
 

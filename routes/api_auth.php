@@ -33,15 +33,18 @@
 			'description' => 'It includes: JWT-tokens, RBAC with permissions, sql-queries with PDO and validation on submitted data. '
 							.'Dynamically call API-requests an url-path permission-protected by default for: '
 							.'all records, find an ID and CRUD is on every existing db-table possible. '
-							.'Create your own API-requests with sql-queries nested and/or with relations or aggregations.',
+							.'Create your own API-requests with sql-queries nested and/or with relations or aggregations.'
+							.'Get dynamically records from related tables (parent-related).',
+			
 			'possible_urls' => [
 				['explanation'=> 'home-page',
-					'method'=> 'get',             'path' => '/',                'post'=>null],   // home
+					'method'=> 'get',             'path' => '/',      'post'=>null],   // home
 				['explanation'=> 'about-page + explanation',
 					'method'=> 'get',   'path' => '/about',           'post'=>null],  // about and example url's
 
+				// get JWT-token
 				['explanation'=> 'get JWT-token + permissions',
-					'method'=> 'post',  'path' => '/signin',  'post'=>null],          // get JWT-token with included permissions
+					'method'=> 'post',  'path' => '/signin',            'post'=>null],   // get JWT-token with included permissions
 
 				['explanation'=> 'beer with id 12 from table `beers`',
 					'method'=> 'get',           'path' => '/beers/12',     'post'=>null],
@@ -51,6 +54,17 @@
 					'method'=> 'get',      'path' => '/beers?page=3',      'post'=>null],
 				['explanation'=> 'beers paginated by 5, page 3 from table `beers`',
 					'method'=> 'get',      'path' => '/beers?paginate=5&page=3', 'post'=>null],
+				
+				// RELATED
+				['explanation'=> 'records of all beers appended with records of related tables and records (depth = 3, depth restricted due to mem-overload)',
+					'method'=> 'get',      'path' => '/beers?related=3',    'post'=>null],
+				['explanation'=> '3th page with paginated default amount beers-records of beers and there related tables and records (depth = 3)',
+					'method'=> 'get',      'path' => '/beers?&page=3', 'post'=>null],
+				['explanation'=> '3th page with paginated custom amount of 5 beers-records of beers and there some (depth = 1) related tables and records',
+					'method'=> 'get',      'path' => '/beers?related=1&paginate=5&page=3', 'post'=>null],
+				['explanation'=> 'beer with id 13 from table `beers` with all the records of related table-records (depth = 3)',
+					'method'=> 'get',      'path' => '/beers/13?related=3', 'post'=>null],
+				// CRUD
 				['explanation'=> 'create new beer-record in table `beers`',
 					'method'=> 'post',      'path' => '/beers/create',     'post'=>['name'=>'MyBeer', 'brewer'=>'Flights', '-keyname-'=>'...value...']],
 				['explanation'=> 'update beer-record with id 12 in table `beers`',
@@ -61,11 +75,17 @@
 					'method'=> 'delete',    'path' => '/beers/trash/13',   'delete'=>null],
 				['explanation'=> 'restore trashed beer with id 13 in table `beers`',
 					'method'=> 'delete',     'path' => '/beers/restore/13', 'delete'=>null],
-				
+	
+				// CUSTOM EXAMPLE
 				['explanation'=> 'custom url-path with its own permission and own specific mysql-query (with table-relations)',
 					'method'=> 'get',    'path' => '/bars/totals',      'post'=>null], // custom api-request, with custom permissions in /config/rbac.php
 			],
+			
+			
 			'possible_methods' =>['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],             // accepted methods
+			'CORS' => ['FligjtAPI supports CORS'],                                      //
+			'JSON' => ['FlightAPI supports only a json-response, with keys:' =>
+						['data', 'meta', 'request', 'response']],
 			'used_sources' => ['Flight PHP'  =>'https://github.com/mikecao/flight',     // used Git-resources/projects
 				              'Firebase-JWT'=>'https://github.com/firebase/php-jwt']
 		];

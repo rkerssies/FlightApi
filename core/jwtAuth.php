@@ -35,6 +35,7 @@
 		
 		private $user = null;
 		private $name = null;
+		private $avatar = null;
 		private $roles = [];
 		public $jwtFail = null;
 		public $jwtSuccess = null;
@@ -72,6 +73,7 @@
 				{
 					$this->user = $record['email'];
 					$this->name = $record['name'];
+					$this->avatar = $record['avatar'];
 					$this->roles = $record['roles'];      // comma-separated values
 					
 					$this->successResponse  = true;
@@ -132,6 +134,7 @@
 					'token' =>'Bearer:'.$jwt,
 					'username' => $this->name,
 					'email'     => $this->user,
+					'avatar'     => $this->avatar,  // base64 encode blob data
 					"issued_at"  => gmdate('Y-m-d H:i:s',$this->jwtConfig->IssuedAT_claim),
 					"not_before" => gmdate('Y-m-d H:i:s',$this->jwtConfig->NotBeFore_claim),
 					"expired_at" => gmdate('Y-m-d H:i:s',$this->jwtConfig->EXPire_claim),

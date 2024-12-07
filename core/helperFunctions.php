@@ -90,3 +90,19 @@
 		die(' decoding and checking Permissions from JWT-token ');
 		
 	}
+	
+	
+	function check_diff_multiArray($array1, $array2){
+		$result = array();
+		foreach($array1 as $key => $val) {
+			if(isset($array2[$key])){
+				if(is_array($val) && $array2[$key]){
+					$result[$key] = check_diff_multi($val, $array2[$key]);
+				}
+			} else {
+				$result[$key] = $val;
+			}
+		}
+		
+		return $result;
+	}
