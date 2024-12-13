@@ -101,7 +101,7 @@
 				'path'      => $pathParts[0],
 				'qsa'       => !empty($pathParts[1]) ? '?'.$pathParts[1] : null ,
 				'method' => $cleanRequests->method,
-				'get'   => (object) $cleanRequests->cleanGetArray,
+				'get'   =>  (object)[],
 				$cleanRequests->method     => (object) $cleanSubmittedData,   // data of: post, put, patch, delete
 				'values' => [
 					'id'       => Flight::request()->query['id'] , //    Flight::request()->query['id'],   // get-value from URL
@@ -112,6 +112,7 @@
 					'rbac'    => null,
 				]
 			];
+			$this->request->get = (object) $cleanRequests->cleanGetArray;   // adding get-values to request-object
 			
 			if(! empty($this->response->count)) {$count = $this->response->count ;}else {$count = 0;}
 			$this->response  = (object)  // create response with default values, ready to overwrite

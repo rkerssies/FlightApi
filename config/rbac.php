@@ -21,9 +21,9 @@
 			'users'     => ['all','find','create','edit','destroy','trash','restore' ], // keep last root !!!  (trash OR destroy)
 			'beers'     => ['all','find','create','edit','destroy','trash','restore' ],
 			'brewers'   => ['all','find','create','edit','destroy','trash','restore' ],
-			'beers_brewers'   => ['all','find','create','edit','destroy','trash','restore' ],
+			'beers_brewers' => ['all','find','create','edit','destroy','trash','restore' ],
 			'users_beers'   => ['all','find','create','edit','destroy','trash','restore' ],
-			'order_beer'   => ['all','find','create','edit','destroy','trash','restore' ],
+			'order_beer'    => ['all','find','create','edit','destroy','trash','restore' ],
 			
 		],
 		'user' => [         // role with its permissions (theme & action)

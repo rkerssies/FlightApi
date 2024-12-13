@@ -49,6 +49,7 @@ use \PDO;
 				{
 					$result=$this->querySucces;
 				}
+				
 				if(str_contains($query, 'INSERT'))
 				{
 					$result = true;
@@ -59,6 +60,7 @@ use \PDO;
 					$this->affectedRows = $stmt->rowCount();
 				}
 				$this->pdo->commit();
+
 				return $result;
 			
 		}
@@ -85,7 +87,7 @@ use \PDO;
 		 * Fetch data recursively for a table and its related tables while preventing cycles.
 		 */
 		public function fetchDataRecursive($table, $parentKey=null, $parentValue=null,
-						$visitedTables=[], $depth=0, $maxDepth=1|2|3)
+						$visitedTables=[], $depth=0, $maxDepth=1|2|3|4)
 		{
 			// stop recursive if max depth reached, prevent cycle
 			if(in_array($table, $visitedTables))
@@ -93,7 +95,7 @@ use \PDO;
 				return [];
 			}
 			// add current table to list
-			$visitedTables[]=$table;
+//			$visitedTables[]=$table;
 			$query="SELECT * FROM `$table`";
 			$params=[];
 			if($parentKey===null && is_numeric($this->queryParams['id']))
@@ -125,7 +127,7 @@ use \PDO;
 			// Verkrijg foreign key-relaties
 			$foreignKeys = $this->getForeignKeys($table);
 			// Verwerk elke rij om gerelateerde gegevens toe te voegen
-
+			$visitedTables[] =  $table;
 			foreach($rows as &$row)
 			{
 				foreach($foreignKeys as $fk)

@@ -67,8 +67,8 @@
 			if(!empty($this->request->get->related) && is_numeric($this->request->get->related))
 			{
 
-				if (!in_array($this->request->get->related, [1,2,3])) {
-					$this->dataResponse = ['message' => 'URLkey \'related\' with incorrect max recursive depth. Acceeptehd depth-values are:  1, 2, or 3'];
+				if (!in_array($this->request->get->related, [1,2,3,4])) {
+					$this->dataResponse = ['message' => 'URLkey \'related\' with incorrect max recursive depth. Acceeptehd depth-values are:  1,2,3, or 4 '];
 				}
 				else    {
 					$this->db->queryParams = ['id' => null, 'page'=> $page, 'paginate' => $paginate];
@@ -119,12 +119,14 @@
 			if(!empty($jwtObj->jwtSuccess)) { $this->response->token_payload  = $jwtObj->jwtSuccess; }
 
 			// Append response with related-data (on request: index.php?related=1 )
-			if (!empty($this->request->get->related) && !in_array($this->request->get->related, [1,2,3]))
+
+			if (!empty($this->request->get->related) && !in_array($this->request->get->related, [1,2,3,4]))
 			{
-				$this->dataResponse = ['message' => 'URLkey \'related\' with incorrect max recursive depth. Acceeptehd depth-values are:  1, 2, or 3'];
+				$this->dataResponse = ['message' => 'URLkey \'related\' with incorrect max recursive depth. Acceeptehd depth-values are:  1, 2, 3, or 4'];
 			}
 			elseif(!empty($this->request->get->related) && in_array($this->request->get->related, [1,2,3]))
 			{
+
 				$this->db->queryParams=['id'=>$id, 'page'=>null, 'paginate'=>null];
 				$this->dataResponse=$this->db->fetchDataRecursive($table, null, null, [], 0, $this->request->get->related);
 			}

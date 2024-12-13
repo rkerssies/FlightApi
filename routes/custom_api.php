@@ -34,7 +34,7 @@
 						FROM   customers c
 						LEFT JOIN orders as o
 							ON c.id = o.customer_id
-			                LEFT JOIN order_beer as b
+			                LEFT JOIN orders_beers as b
 								ON o.id = b.order_id
 						GROUP BY c.id, c.barname
 						ORDER BY c.barname';
