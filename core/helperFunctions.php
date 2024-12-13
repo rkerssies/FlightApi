@@ -5,8 +5,7 @@
 	 * Date:    24/11/2023
 	 * File:    helperFunctions.php
 	 */
-
-
+	
 	function dd($var=null)
 	{
 		echo '('.gettype($var).'):'."&emsp;";
@@ -41,57 +40,6 @@
 		}
 		die('dd - value of parameter: '.$var);
 	}
-	
-	
-	function createPutPatchDelete() {
-		$array = [];
-		
-		if ( strtoupper($_SERVER['REQUEST_METHOD']) == 'PUT' || strtoupper($_SERVER['REQUEST_METHOD']) == 'PUT'
-			|| strtoupper($_SERVER['REQUEST_METHOD']) == 'PATCH'|| strtoupper($_SERVER['REQUEST_METHOD']) == 'DELETE') {
-			$method = '_'.strtoupper($_SERVER['REQUEST_METHOD']);
-			
-			parse_str(file_get_contents('php://input'), $dataMethod);
-			if(!empty($dataMethod))
-			{
-				$key = key($dataMethod);
-				$dataMethod = explode('----------------------------',$dataMethod[$key]);
-				foreach($dataMethod as $value) {
-					$parts = explode('"', $value);
-					if(isset($parts[1]) && isset($parts[2])) {
-						$key = preg_replace('/\s+/','',($parts[1]));
-						$value = str_replace("\t", '', $parts[2]);
-						$value = str_replace("\n", '', $value);
-						$value = str_replace("\r", '', $value);
-						$array[$key] = trim(strip_tags(htmlspecialchars($value)), ' ');
-					}
-				}
-			}
-		}
-		return $array;
-	}
-
-	
-	function getBearer($url, $config)
-	{
-	// !!!!   include class JWT  namespace
-		// $this->Key  === Key::class
-	
-//		$jwtToken = get_headers($url, true)['Authorization'];
-//
-//
-//		$leeWayTime         = 120; // seconds   /// FROM CONFIG !!!
-//		$encryptionType     = 'HS256';              // or  HS512  -> GET FROM    config
-//
-//		//$this->config->token_key, 'HS256');
-//		JWT::$leeway = $leeWayTime; // $leeway in seconds
-//		$decoded = JWT::decode($jwtToken, new Key($config->token_key, $encryptionType));
-//
-//		print_r($decoded);
-		die(' decoding and checking Permissions from JWT-token ');
-		
-	}
-	
-	
 	function check_diff_multiArray($array1, $array2){
 		$result = array();
 		foreach($array1 as $key => $val) {

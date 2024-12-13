@@ -99,7 +99,7 @@
 
 					$role = trim($role.' ');
 					if(!empty($this->rolesPermissionsArray[$role]))
-					{   // skip meantioned roles in usert-table field: roles,
+					{   // skip mentioned roles in usert-table field: roles,
 						// but not found in array /config/rbac.php
 						$permissions=$this->rolesPermissionsArray[$role]; // get permissions on roles for this user requesting a token
 						foreach($permissions as $table=>$arrayActions)
@@ -186,7 +186,6 @@
 				$this->jwtFail = 'jwt-token provided no valid permission for requested url';
 				return false;
 			}
-//			unset($decodedPayload->data->permissions);      // remove list with ALL ALLOWED permissions from response
 			
 			$this->jwtSuccess = $decodedPayload->data;
 			return true;

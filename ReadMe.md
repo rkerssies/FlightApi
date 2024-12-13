@@ -14,18 +14,18 @@ You can easelly add your own routes, custom sql-queries and data-validation, rol
 
 ### Some impressions
 Below are some PostMan screenshots that give an impression of how te json-responses.
-
-<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/01-get-token.png" width="30%" style="margin-right:10px;display:block;float:left;"> 
-<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/02-find-by-id.png" width="30%" style="margin-right:10px;display:block;float:left;"> 
-<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/03-custom-sql.png" width="30%" style="margin-right:10px;display:block;float:left;">
-<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/04-related-sql-all-d3.png" width="30%" style="margin-right:10px;display:block;float:left;">
-<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/04a-related-sql-all-d1.png" width="30%" style="margin-right:10px;display:block;float:left;">
-<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/04b-related-sql all-page-paginated.png" width="30%" style="margin-right:10px;display:block;float:left;">
-<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/04c-related-sql-paged.png" width="30%" style="margin-right:10px;display:block;float:left;">
-<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/5-related-sql-find-id.png" width="30%" style="margin-right:10px;display:block;float:left;">
-<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/06-me-from-token.png" width="30%" style="margin-right:10px;display:block;float:left;">
-<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/07-response-structure.png" width="30%" style="margin-right:10px;display:block;float:left;">
-   
+<div style="display: inline-block">
+<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/01-get-token.png" width="25%" style="margin-right:10px;display:block;float:left;"> 
+<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/02-find-by-id.png" width="25%" style="margin-right:10px;display:block;float:left;"> 
+<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/03-custom-sql.png" width="25%" style="margin-right:10px;display:block;float:left;">
+<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/04-related-sql-all-d3.png" width="25%" style="margin-right:10px;display:block;float:left;">
+<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/04a-related-sql-all-d1.png" width="25%" style="margin-right:10px;display:block;float:left;">
+<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/04b-related-sql all-page-paginated.png" width="25%" style="margin-right:10px;display:block;float:left;">
+<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/04c-related-sql-paged.png" width="25%" style="margin-right:10px;display:block;float:left;">
+<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/5-related-sql-find-id.png" width="25%" style="margin-right:10px;display:block;float:left;">
+<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/06-me-from-token.png" width="25%" style="margin-right:10px;display:block;float:left;">
+<img src="https://github.com/rkerssies/FlightApi/blob/main/ReadMe/07-response-structure.png" width="25%" style="margin-right:10px;display:block;float:left;">
+</div>
   
 ## Installation and configuration
 * Pull the project from GitHub; [FlightAPI]( 'https://github.com/rkerssies/FlightApi' )

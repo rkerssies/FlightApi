@@ -24,11 +24,12 @@
 		
 		public function validator($request)
 		{
+//TODO build more validationfrom : ValidationPatterns.php
+			
 			if(! empty($this->rulesArray[$this->table]))
-			{   // validation is required (no empty key-name in config/validation.php_
+			{   // validation is required (no empty key-name in config/validation.php )
 				foreach($this->rulesArray[$this->table] as $fieldName => $validationArray)
-				{   // array with validation-rukles is leading to check if all fields ar valid, or required
-					//					dd($validationArray);
+				{   // array with validation-rules is leading to check if all fields ar valid, or required
 
 					foreach($validationArray as $v_item)
 					{
@@ -51,14 +52,57 @@
 							$this->fails=['message'=>'FAILED validation, validation-rule '.$validatorMethodName.' not found', 'status'=>false, 'fail'=>true];
 							return false;
 						}
-						if(empty($request->$fieldName) && $validatorMethodName == 'is_Required')
+						
+						if( $validatorMethodName == 'is_Required'&&
+							( empty($request->$fieldName) || $request->$fieldName == ''  || $request->$fieldName == null))
 						{
 							$fails[$fieldName][] = $fieldName.' - NOT found in request and is required';
 						}
-						elseif(! empty($request->$fieldName) && empty($validatorParam)
-							&& ! $this->$validatorMethodName($request->$fieldName))
+						elseif( $validatorMethodName == 'is_Numeric' &&
+							!empty($request->$fieldName) && !is_numeric($request->$fieldName))
 						{
-							$fails[$fieldName][] = $fieldName.' - '.$this->failMessage;
+							$fails[$fieldName][] = $fieldName.' - is NOT numeric';
+						}
+						elseif( $validatorMethodName == 'is_String' &&
+							!empty($request->$fieldName) && !is_string($request->$fieldName))
+						{
+							$fails[$fieldName][] = $fieldName.' - is NOT string';
+						}
+						elseif( $validatorMethodName == 'is_Lessthan' &&
+							$request->$fieldName < $validatorParam )
+						{
+							$fails[$fieldName][] = $fieldName.' - value is NOT less than '.$validatorParam;
+						}
+						elseif( $validatorMethodName == 'is_Biggerthan' &&
+							$request->$fieldName < $validatorParam )
+						{
+							$fails[$fieldName][] = $fieldName.' - value is NOT more than '.$validatorParam;
+						}
+						elseif( $validatorMethodName == 'is_Different_with' &&
+							$request->$fieldName == $validatorParam )
+						{
+							$fails[$fieldName][] = $fieldName.' - value is NOT different from value '.$validatorParam;
+						}
+						elseif( $validatorMethodName == 'is_Equals_with' &&
+							$request->$fieldName != $validatorParam )
+						{
+							$fails[$fieldName][] = $fieldName.' - value is NOT the same with with value '.$validatorParam;
+						}
+						elseif( $validatorMethodName == 'is_Min' &&
+							strlen($request->$fieldName) < $validatorParam )
+						{
+							$fails[$fieldName][] = $fieldName.' - character count is LESS than '.$validatorParam;
+						}
+						elseif( $validatorMethodName == 'is_Max' &&
+							strlen($request->$fieldName) > $validatorParam )
+						{
+							$fails[$fieldName][] = $fieldName.' - character count is MORE than '.$validatorParam;
+						}
+						elseif( $validatorMethodName == 'is_Email' &&
+							! preg_match("/^[A-z0-9-_]+([.][A-z0-9-_]+)*[@][A-z0-9-_]+([.][A-z0-9-_]+)*[.][a-z]{2,4}$/D",
+										$request->$fieldName))
+						{
+							$fails[$fieldName][] = $fieldName.' - is NOT a valid email-address';
 						}
 						elseif(! empty($request->$fieldName) && ! empty($validatorParam)
 							&& ! $this->$validatorMethodName($request->$fieldName, $validatorParam))
@@ -67,6 +111,7 @@
 						}
 					}
 				}
+				
 				if(!empty($fails))
 				{
 					$this->fails=['message'=>'submitted form has validation errors', 'status'=> false, 'fail'=>$fails];

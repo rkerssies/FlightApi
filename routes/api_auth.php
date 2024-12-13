@@ -56,11 +56,11 @@
 					'method'=> 'get',      'path' => '/beers?paginate=5&page=3', 'post'=>null],
 				
 				// RELATED
-				['explanation'=> 'records of all beers appended with records of related tables and records (depth = 3, depth restricted due to mem-overload)',
+				['explanation'=> 'records of all beers appended with records of related tables and records (depth = 3. depth restricted to max 3, due to mem-overload)',
 					'method'=> 'get',      'path' => '/beers?related=3',    'post'=>null],
 				['explanation'=> '3th page with paginated default amount beers-records of beers and there related tables and records (depth = 3)',
-					'method'=> 'get',      'path' => '/beers?&page=3', 'post'=>null],
-				['explanation'=> '3th page with paginated custom amount of 5 beers-records of beers and there some (depth = 1) related tables and records',
+					'method'=> 'get',      'path' => '/beers?related=3&page=3', 'post'=>null],
+				['explanation'=> '3th page with paginated custom amount of 5 beers-records of beers and there some (depth = 1, same as without key \'related\' ) related tables and records',
 					'method'=> 'get',      'path' => '/beers?related=1&paginate=5&page=3', 'post'=>null],
 				['explanation'=> 'beer with id 13 from table `beers` with all the records of related table-records (depth = 3)',
 					'method'=> 'get',      'path' => '/beers/13?related=3', 'post'=>null],
@@ -82,7 +82,10 @@
 			],
 			
 			
-			'possible_methods' =>['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],             // accepted methods
+			'possible_methods' => [
+								'directly'  => ['GET', 'POST'],
+								'with @post and key _method ' => ['PUT', 'PATCH', 'DELETE']
+								],             // accepted methods
 			'CORS' => ['FligjtAPI supports CORS'],                                      //
 			'JSON' => ['FlightAPI supports only a json-response, with keys:' =>
 						['data', 'meta', 'request', 'response']],
@@ -121,10 +124,23 @@
 	/* Get JWT-token with incl RBAC-permissions  */
 	Flight::route('POST /signin', function()
 	{
-		$this->dataResponse         = $this->jwtAuth->createToken( (array) $this->request->post);
-		$this->messageResponse      = $this->jwtAuth->messageResponse;
-		$this->statusResponse       = $this->jwtAuth->statusResponse;
-		$this->response->validation = $this->jwtAuth->validation;
-		$this->request->post->password = null;
-		$this->response->count      = $this->jwtAuth->count;
+		$validated = $this->requestValidation->validator((object)$this->request->post);
+		
+		if( ! $validated) // failed
+		{
+			$this->successResponse  = false;
+			$this->messageResponse  = 'NOT SIGNED IN, validation FAILED on signin-data';
+			$this->response->validation  = $this->requestValidation->fails;
+			$this->statusResponse  = 400;
+		}
+		else {
+			$this->dataResponse         = $this->jwtAuth->createToken( (array) $this->request->post);
+			$this->messageResponse      = $this->jwtAuth->messageResponse;
+			$this->statusResponse       = $this->jwtAuth->statusResponse;
+			$this->response->validation = $this->jwtAuth->validation;
+			$this->request->post['password'] = null;  // security: remove password from request
+			$this->response->count      = $this->jwtAuth->count;
+		}
+		
+
 	});

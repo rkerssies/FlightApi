@@ -43,7 +43,7 @@
 		
 		protected function is_Required($value)
 		{
-			if(empty($value)  )   {      // nb: requird getal 'nul' (0) als text is === null
+			if(!empty($value)  )   {      // nb: requird getal 'nul' (0) als text is === null
 				$this->failMessage = 'field is required';
 				return false;
 			}

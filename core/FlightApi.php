@@ -41,7 +41,6 @@
 		
 		public function __construct()
 		{
-			$this->request = (object) $this->request;
 			global $_PUT;
 			global $_PATCH;
 			global $_DELETE;
@@ -63,7 +62,6 @@
 			require_once "../core/pdoDB.php";
 			require_once "../core/validation/ValidationPatterns.php";
 			require_once "../core/validation/FormRequests.php";
-
 	
 			// pdo database-object
 			$this->config =  include "../config/app.php";    // get config
@@ -71,7 +69,6 @@
 			
 			$pathParts = explode('?',Flight::request()->url);
 			$this->host = isset($_SERVER["HTTPS"]) ? 'https'.'://' : 'http' .'://'.$_SERVER['HTTP_HOST'];
-			
 			// JWT object
 			$this->jwtAuth = new jwtAuth($this->config->jwt, $this->db, $this->host.Flight::request()->url);
 
@@ -79,57 +76,58 @@
 			$this->id       = Flight::request()->query['id'];   // get-value from URL
 			$this->paginate = Flight::request()->query['paginate'];
 			$this->page     = Flight::request()->query['page'];
-
-			// build response of get and  post AND-OR put, patch or delete
-			$cleanRequests = new cleanRequests();
-			if(! $cleanRequests->build()) {
-				die('FAILED support on cleaning get and/or post AND creating clean globals for put, patch or delete');
-			}
-
-			$method = $cleanRequests->method;
-			$cleanRequests->cleanGet();
-			$cleanRequests->cleanPost();
+	
 			$this->request  = (object) [];
 			$this->response = (object) [];
-
 			
-			if($method == 'post' ||$method == 'put' || $method == 'patch'  )
+			// build response of get and  post AND-OR put, patch or delete
+			$cleanRequests = new cleanRequests();
+			$cleanSubmittedData =  $cleanRequests->build();
+//			if(! is_array($cleanSubmittedData)) {
+//				die('FAILED support on creating clean globals for post, put, patch or delete');
+//			}
+
+//			// validation of submitted DATA
+			if($cleanRequests->method == 'post' ||$cleanRequests->method == 'put' || $cleanRequests->method == 'patch'  )
 			{   // validation-object, when data is possibly submitted, eq for actions: 'create' and 'edit'
 				$validationArray = include('../config/validation.php');
 				$table = explode('/',ltrim($pathParts[0], '/'))[0];
 				$this->requestValidation = new FormRequests($validationArray, $table);
 			}
-
+			
 			$this->request  = (object) // default response-values, ready to overwrite
 			[
 				'hostname' => Flight::request()->host,
 				'path'      => $pathParts[0],
 				'qsa'       => !empty($pathParts[1]) ? '?'.$pathParts[1] : null ,
-				'method' => $method,
-				$method     => (object)     $cleanRequests->cleanPutPatchDeleteArray,   // overwritten wehn GET or POST
-				'get'       => (object)     $cleanRequests->cleanGetArray,
-				'post'      => (object)     $cleanRequests->cleanPostArray,
+				'method' => $cleanRequests->method,
+				'get'   => (object) $cleanRequests->cleanGetArray,
+				$cleanRequests->method     => (object) $cleanSubmittedData,   // data of: post, put, patch, delete
 				'values' => [
 					'id'       => Flight::request()->query['id'] , //    Flight::request()->query['id'],   // get-value from URL
 					'paginate' => Flight::request()->query['paginate'],
 					'page'     => Flight::request()->query['page'],
-					'action'   => null
+					'table'    => null,
+					'action'   => null,
+					'rbac'    => null,
 				]
 			];
-
-			$this->response  = (object)  // default response-values, ready to overwrite
+			
+			if(! empty($this->response->count)) {$count = $this->response->count ;}else {$count = 0;}
+			$this->response  = (object)  // create response with default values, ready to overwrite
 			[
-				'count'         => 0 ,
-				'total'         => null ,      // amount in table (usefull for pagination) with GET
-				// 'affectedrows' => null,
-				'lastinserted'  =>  null,
-				'token_payload'=>   null,
-				'validation'    =>  []
+				'count'         => 0,
+				'total'         => null ,      // amount in table (useful for pagination) with GET
+				'affectedrows'  => null,
+				'lastinserted'  => null,
+				'token_payload' => null,
+				'validation'    => []
 			];
 		}
 		
 		public function run()
 		{
+
 			// include all Flight-routs organized in several files
 			include "../routes/api_auth.php";               // include and run all route-functions
 			include "../routes/custom_api.php";             // include and run custom created route-functions
@@ -138,7 +136,7 @@
 				// return 404 json-respons for non-existing url-requests
 				$this->error('Not Found', 404);
 			});
-			
+
 			// create default json-headers, to enable CORS
 //			header("Access-Control-Allow-Origin: ".$this->host );
 			header("Access-Control-Allow-Origin: *");       // allow all remote domains
@@ -150,6 +148,7 @@
 			header("Content-type: application/json");
 			header("Access-Control-Allow-Headers: Content-Type, Accept, Origin, Access-Control-Allow-Headers,Authorization, Authentication, X-Requested-With");
 			
+
 			// Handle preflight requests
 			if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 				// If you need to allow cookies or HTTP authentication, set this header
@@ -169,7 +168,9 @@
 		{
 			if(is_array($this->dataResponse) && empty($this->response->lastinserted))
 			{ $this->response->count = count($this->dataResponse); }
-			elseif($this->statusResponse != 400 || $this->statusResponse != 404) {
+			
+			elseif($this->statusResponse == 400 || $this->statusResponse == 404
+				|| $this->statusResponse == 412 || $this->statusResponse == 500) {
 				$this->response->count = 0;
 			}
 			else {
@@ -178,6 +179,7 @@
 			if(!empty($this->dataResponse['token']))   {
 				$this->response->count = 1;
 			}
+			
 			
 			Flight::json(
 			[
