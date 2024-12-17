@@ -30,7 +30,7 @@
 		elseif(!$this->db->tableExists($table)){
 			$this->dataResponse = false;
 			$this->statusResponse = 412;
-			$this->messageResponse='table-name is incorrect or unknown; '.$table;
+			$this->messageResponse = 'table-name is incorrect or unknown; '.$table;
 			$this->response->validation  = ['tablename' => 'unknonw', 'table' => $table];
 		}
 		else    {
