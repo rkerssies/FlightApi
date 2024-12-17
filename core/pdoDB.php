@@ -30,8 +30,8 @@ use \PDO;
 			if(empty($this->pdo))
 			{
 				$this->pdo=new \PDO('mysql:host='.$config->host.';dbname='.$config->dbname, $config->user, $config->pass, $attr);
-				
 			}
+			
 		}
 		
 		public function query($query, $parameters=null)
@@ -94,8 +94,10 @@ use \PDO;
 			{
 				return [];
 			}
+
 			// add current table to list
-//			$visitedTables[]=$table;
+			$visitedTables[]=$table;
+			
 			$query="SELECT * FROM `$table`";
 			$params=[];
 			if($parentKey===null && is_numeric($this->queryParams['id']))
@@ -127,7 +129,7 @@ use \PDO;
 			// Verkrijg foreign key-relaties
 			$foreignKeys = $this->getForeignKeys($table);
 			// Verwerk elke rij om gerelateerde gegevens toe te voegen
-			$visitedTables[] =  $table;
+//			$visitedTables[] =  $table;
 			foreach($rows as &$row)
 			{
 				foreach($foreignKeys as $fk)
@@ -159,8 +161,9 @@ use \PDO;
 								// Voeg gerelateerde gegevens toe
 								$row[$relatedTable]=$relatedRows;
 							}
-							$visitedTables[] = $relatedTable;   // add table to list of found tables
 						}
+
+						
 					}
 				}
 			}
