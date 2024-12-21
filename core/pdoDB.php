@@ -31,7 +31,6 @@ use \PDO;
 			{
 				$this->pdo=new \PDO('mysql:host='.$config->host.';dbname='.$config->dbname, $config->user, $config->pass, $attr);
 			}
-			
 		}
 		
 		public function query($query, $parameters=null)
@@ -126,10 +125,9 @@ use \PDO;
 			$stmt=$this->pdo->prepare($query);
 			$stmt->execute($params);
 			$rows=$stmt->fetchAll(PDO::FETCH_ASSOC);
-			// Verkrijg foreign key-relaties
+			// get foreign key-relaties
 			$foreignKeys = $this->getForeignKeys($table);
-			// Verwerk elke rij om gerelateerde gegevens toe te voegen
-//			$visitedTables[] =  $table;
+
 			foreach($rows as &$row)
 			{
 				foreach($foreignKeys as $fk)
@@ -162,8 +160,6 @@ use \PDO;
 								$row[$relatedTable]=$relatedRows;
 							}
 						}
-
-						
 					}
 				}
 			}

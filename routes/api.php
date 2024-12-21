@@ -243,7 +243,7 @@
 		{
 			if(!empty($jwtObj->jwtSuccess)) { $this->response->token_payload  = $jwtObj->jwtSuccess; }
 			$validated = $this->requestValidation->validator((object)$this->request->put);
-			
+
 			if( ! $validated) // failed
 			{
 				$this->successResponse  = false;
@@ -259,8 +259,9 @@
 					$setString.="`".$key."`='".$value."', ";
 				}
 				$sql = "UPDATE `".$table."` SET ".rtrim($setString, ', ')." WHERE `id` = '".$id."'";
+				
 				$this->dataResponse=$this->db->query($sql);
-				if($this->db->affectedRows > 0)
+				if($this->db->affectedRows > 0 || $this->dataResponse == true)
 				{
 					$this->request->put=(object)array_merge(['id'=>$id], (array)$this->request->put);
 					$this->dataResponse=true;

@@ -18,8 +18,9 @@
 
 		],
 		'beers' => [
-				'name'  => ['required', 'string','max:20'],
-				'brewer'  => ['required','string'],
+				'name'  => ['required', 'string','max:50'],
+//				'brewer'  => ['required','string'],
+				'brewer_id'  => ['required','numeric'],
 				'perc'  => ['required','numeric','smallerthan:14', 'biggerthan:-0.1'],
 			]
 		

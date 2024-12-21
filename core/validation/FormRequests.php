@@ -25,7 +25,6 @@
 		public function validator($request)
 		{
 //TODO build more validationfrom : ValidationPatterns.php
-			
 			if(! empty($this->rulesArray[$this->table]))
 			{   // validation is required (no empty key-name in config/validation.php )
 				foreach($this->rulesArray[$this->table] as $fieldName => $validationArray)

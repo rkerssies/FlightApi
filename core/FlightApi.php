@@ -41,12 +41,12 @@
 		
 		public function __construct()
 		{
-			global $_PUT;
-			global $_PATCH;
-			global $_DELETE;
-			$_PUT    = [];
-			$_PATCH  = [];
-			$_DELETE = [];
+//			global $_PUT;
+//			global $_PATCH;
+//			global $_DELETE;
+//			$_PUT    = [];
+//			$_PATCH  = [];
+//			$_DELETE = [];
 			require_once '../vendor/mikecao/flight/flight/Flight.php';
 			require_once '../vendor/mikecao/flight/flight/autoload.php';
 			include '../vendor/firebase/php-jwt/src/JWT.php';
@@ -82,12 +82,9 @@
 			
 			// build response of get and  post AND-OR put, patch or delete
 			$cleanRequests = new cleanRequests();
-			$cleanSubmittedData =  $cleanRequests->build();
-//			if(! is_array($cleanSubmittedData)) {
-//				die('FAILED support on creating clean globals for post, put, patch or delete');
-//			}
+			$cleanSubmittedData = $cleanRequests->build();
 
-//			// validation of submitted DATA
+			// validation of submitted DATA
 			if($cleanRequests->method == 'post' ||$cleanRequests->method == 'put' || $cleanRequests->method == 'patch'  )
 			{   // validation-object, when data is possibly submitted, eq for actions: 'create' and 'edit'
 				$validationArray = include('../config/validation.php');
@@ -128,7 +125,6 @@
 		
 		public function run()
 		{
-
 			// include all Flight-routs organized in several files
 			include "../routes/api_auth.php";               // include and run all route-functions
 			include "../routes/custom_api.php";             // include and run custom created route-functions
@@ -142,9 +138,11 @@
 //			header("Access-Control-Allow-Origin: ".$this->host );
 			header("Access-Control-Allow-Origin: *");       // allow all remote domains
 			header("Created-by: ".'InCubics.net (c)'.date('Y')."-".(date('Y')+1) );
-			header("Access-Control-Allow-Methods: *");
-//			header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE, PATCH");
+//			header("Access-Control-Allow-Methods: *");
+			header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE, PATCH");
 //			header("Access-Control-Max-Age: 3600");
+			header('Access-Control-Allow-Headers: Content-Type, Authorization');
+			
 			header("Access-Control-Allow-Credentials: true");
 			header("Content-type: application/json");
 			header("Access-Control-Allow-Headers: Content-Type, Accept, Origin, Access-Control-Allow-Headers,Authorization, Authentication, X-Requested-With");

@@ -138,7 +138,7 @@
 			$this->messageResponse      = $this->jwtAuth->messageResponse;
 			$this->statusResponse       = $this->jwtAuth->statusResponse;
 			$this->response->validation = $this->jwtAuth->validation;
-			$this->request->post['password'] = null;  // security: remove password from request
+			$this->request->post->password = null;  // security: remove password from request
 			$this->response->count      = $this->jwtAuth->count;
 		}
 		
