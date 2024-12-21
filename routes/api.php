@@ -258,6 +258,17 @@
 				{
 					$setString.="`".$key."`='".$value."', ";
 				}
+				if(!empty($jwtObj->jwtSuccess)) { $this->response->token_payload  = $jwtObj->jwtSuccess; }
+				
+				// set current dat-time in updated_at when updating
+				if( (bool) $this->db->query('SELECT count(`TABLE_NAME`)as count FROM INFORMATION_SCHEMA.COLUMNS
+                                   WHERE TABLE_SCHEMA = "'.$this->config->db['dbname'].'" AND TABLE_NAME = "'.$table.'" AND COLUMN_NAME ="updated_at"')[0]['count'])
+				{ // column updated_at  found, set current date-time
+					$dateTime = date('Y-m-d H:i:s');
+					$setString.="`updated_at`= '".$dateTime."', ";
+					$this->request->put->updated_at =$dateTime;
+				}
+				
 				$sql = "UPDATE `".$table."` SET ".rtrim($setString, ', ')." WHERE `id` = '".$id."'";
 				
 				$this->dataResponse=$this->db->query($sql);
