@@ -25,7 +25,7 @@ use \PDO;
 			$attr = [
 				PDO::MYSQL_ATTR_FOUND_ROWS=>TRUE,
 				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-				PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+				PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
 			];
 			if(empty($this->pdo))
 			{
@@ -37,7 +37,20 @@ use \PDO;
 		{
 			$this->pdo->beginTransaction();
 			
+			if (!empty($parameters) && is_array($parameters)) {
+				foreach ($parameters as $key => $value) {
+					if ($value === null) {
+						$query = str_replace(":$key", "NULL", $query);
+					} else
+					if (is_string($value)) {
+						$query = str_replace(":$key", $this->pdo->quote($value), $query);
+					} else {
+						$query = str_replace(":$key", $value, $query);
+					}
+				}
+			}
 				$stmt=$this->pdo->prepare($query);
+			
 				$this->querySuccess=$stmt->execute();
 				$result=null;
 				if(str_contains($query, 'SELECT') || str_contains($query, 'UPDATE'))
