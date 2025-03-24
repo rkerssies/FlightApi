@@ -24,12 +24,16 @@
 			'beers_brewers' => ['all','find','create','edit','destroy','trash','restore' ],
 			'users_beers'   => ['all','find','create','edit','destroy','trash','restore' ],
 			'order_beer'    => ['all','find','create','edit','destroy','trash','restore' ],
+			'about'			=>['read'],
+			'tryout'		=>['read'],
 			
 		],
 		'user' => [         // role with its permissions (theme & action)
 			// auto-API on tables; routes/api.php
 			'beers'     => ['all','find'],
 			'brewers'   => ['all'],
+			'about'		=>['read'],
+			'tryout'	=> ['read'],
 			]
 	];
 
