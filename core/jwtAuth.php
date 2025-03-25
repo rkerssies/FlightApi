@@ -33,10 +33,13 @@
 		public $statusResponse = 400;
 		public $count = 0;
 		
-		private $user = null;
-		private $name = null;
-		private $avatar = null;
-		private $roles = [];
+		public $data = null;
+		public $email = null;
+		public $name = null;
+		public $avatar = null;
+		public $roles = [];
+		public $blocked = null;
+		public $newpass = null;
 		public $jwtFail = null;
 		public $jwtSuccess = null;
 		
@@ -52,9 +55,8 @@
 		}
 		
 		
-		private function checkUser($requestPost = [])
+		public function checkUser($requestPost )
 		{
-			// dd(password_hash('password',PASSWORD_BCRYPT, ['cost' => 10]));  // hashing password
 			$validationArray = include('../config/validation.php');
 			$requestValidation = new FormRequests($validationArray); // get validation SIGNIN, $table = empty
 			$validated = $requestValidation->validator((object) $requestPost);
@@ -66,20 +68,57 @@
 				$this->statusResponse  = 400;
 				$this->count = 0;
 			}
-			elseif($validated)  {
-				$record = $this->pdo->query('SELECT * FROM `users` WHERE `email` = "'.$requestPost['email'].'"')[0];
-			
-				if(password_verify($requestPost['password'], $record['password']))  // password from form --- hashed password
+			elseif($validated)  
+			{
+				$record = (object) $this->pdo->query(
+				'SELECT  
+					u.*, 
+					(SELECT 
+						COUNT(*) FROM users WHERE roles LIKE "%root%") AS `root_count`,
+						(CASE WHEN u.roles LIKE "%root%" THEN 1 ELSE 0 END) AS `has_root_role`
+					FROM `users` u 
+					WHERE `email` = "'.$requestPost->email.'"'
+				)[0];
+
+				if(!empty($record->blocked) && $record->blocked != '0000-00-00 00:00:00' &&
+					$record->root_count > $record->has_root_count && $record->root_count > 1)	// last root not blockable
 				{
-					$this->user = $record['email'];
-					$this->name = $record['name'];
-					$this->avatar = $record['avatar'];
-					$this->roles = $record['roles'];      // comma-separated values
+					$this->email = $record->email;
+					$this->name = 	$record->name;
+					$this->avatar = $record->avatar;
+					$this->roles = [];     
+					$this->blocked =  true;
+					$this->successResponse  = true;
+					$this->messageResponse  = 'WARNING! User-account is BLOCKED! Please contact the administrator';
+					$this->statusResponse  = 200;
+					$this->count = 0;
+
+					return false;
+				}
+				elseif(!empty($record->newpass) && $record->newpass != '0000-00-00 00:00:00')
+				{
+					$this->email = $record->email;
+					$this->name = $record->name;
+					$this->avatar = $record->avatar;
+					$this->roles = [];      
+					$this->newpass =  true;
+					$this->successResponse  = true;
+					$this->messageResponse  = 'WARNING! Forced to RENEW password';
+					$this->statusResponse  = 200;
 					
+					return false;
+				}
+				elseif(
+					password_verify($requestPost->password, $record->password))  // password from form -> check with hashed-password
+				{
+					$this->email = $record->email;
+					$this->name = $record->name;
+					$this->avatar = $record->avatar;
+					$this->data = $this->createToken( $requestPost , $record->roles);
+					$this->roles = $record->roles; 
 					$this->successResponse  = true;
 					$this->messageResponse  = 'JWT-token created and provided on a valid user';
 					$this->statusResponse  = 200;
-					$this->count = 1;
 					
 					return true;
 				}
@@ -87,15 +126,14 @@
  			return false;
 		}
 		
-		public function createToken($request = [])
+		public function createToken($request, $roles = '')
 		{
-			if($this->checkUser($request))
-			{
-				$roles = explode(',', $this->roles);
+
+				$rolesArray = explode(',', $roles);
 				
 				$permissionsArray = [];
-				$roles = array_merge($roles,['visitor']);
-				foreach($roles as $role)    {
+				$rolesArray = array_merge($rolesArray,['visitor']);
+				foreach($rolesArray as $role)    {
 
 					$role = trim($role.' ');
 					if(!empty($this->rolesPermissionsArray[$role]))
@@ -110,7 +148,6 @@
 							}
 						}
 					}
-				}
 
 				$payload = [
 					'iss' => isset($_SERVER["HTTPS"]) ? 'https'.'://' : 'http' .'://'.$_SERVER['HTTP_HOST'],
@@ -119,9 +156,9 @@
 					"nbf"        => $this->jwtConfig->NotBeFore_claim,
 					"exp"        => $this->jwtConfig->EXPire_claim,
 					'data' => [
-						'email' => $this->user,
+						'email' => $this->email,
 						'name'  => $this->name,
-						'roles' => $this->roles,
+						'roles' => $rolesArray,
 						'permissions' => $permissionsArray, // make array of permissions available for the Front-end, to be stored in LocalStorage
 					]
 				];
@@ -131,14 +168,15 @@
 				header("Authorization: Bearer:". $jwt);
 				
 				return [ // return token-response
-					'token' =>'Bearer:'.$jwt,
-					'username' => $this->name,
-					'email'     => $this->user,
-					'avatar'     => $this->avatar,  // base64 encode blob data
-					"issued_at"  => gmdate('Y-m-d H:i:s',$this->jwtConfig->IssuedAT_claim),
-					"not_before" => gmdate('Y-m-d H:i:s',$this->jwtConfig->NotBeFore_claim),
-					"expired_at" => gmdate('Y-m-d H:i:s',$this->jwtConfig->EXPire_claim),
-					'permissions' => $permissionsArray
+					'token' 		=> 'Bearer:'.$jwt,
+					"issued_at"  	=> gmdate('Y-m-d H:i:s',$this->jwtConfig->IssuedAT_claim),
+					"not_before" 	=> gmdate('Y-m-d H:i:s',$this->jwtConfig->NotBeFore_claim),
+					"expired_at" 	=> gmdate('Y-m-d H:i:s',$this->jwtConfig->EXPire_claim),
+					'username' 		=> $this->name,
+					'email'     	=> $this->email,
+					'avatar'    	 => $this->avatar,  // base64 encode blob data
+					"roles"			=> $rolesArray,
+					'permissions' 	=> $permissionsArray
 				];
 			}
 		}

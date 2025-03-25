@@ -119,6 +119,8 @@
 				'affectedrows'  => null,
 				'lastinserted'  => null,
 				'token_payload' => null,
+				'blocked'		=> null,
+				'newpass'		=> null,
 				'validation'    => []
 			];
 		}
@@ -165,9 +167,13 @@
 		
 		private function sendRespons()
 		{
-			if(is_array($this->dataResponse) && empty($this->response->lastinserted))
-			{ $this->response->count = count($this->dataResponse); }
-			
+			if(!empty($this->dataResponse->token))   {	// requests for token | newpass | blocked
+				$this->response->count = 1;
+			}
+			elseif(is_array($this->dataResponse) && empty($this->response->lastinserted))
+			{ 
+				$this->response->count = count($this->dataResponse); 
+			}
 			elseif($this->statusResponse == 400 || $this->statusResponse == 404
 				|| $this->statusResponse == 412 || $this->statusResponse == 500) {
 				$this->response->count = 0;
@@ -175,9 +181,7 @@
 			else {
 				$this->response->count = 1;
 			}
-			if(!empty($this->dataResponse['token']))   {
-				$this->response->count = 1;
-			}
+
 			
 			
 			Flight::json(

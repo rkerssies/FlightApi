@@ -4,36 +4,37 @@
 	                configuration values
 	******************************************************* */
 	
-	$now = time();
-	$token_due_days = 10; // token valid for X days
+$now = time();
+$token_due_days = 1; 									// token valid for X days
 	
-	return (object) [
+return (object) [
 	
-		'siteName' => 'my FlightApi project',
-		'created' => 'InCubics.net',
-		'app_key'  =>  'qwerty%#%0987654321#$#qwerty',                                          //TODO used 4 encrypt passwords
+	'siteName' => 'my FlightApi project',
+	'created' => 'InCubics.net',
+	'app_key'  =>  'qwerty%#%0987654321#$#qwerty',     //TODO used 4 encrypt passwords
+	
+	/// Database mySql
+	'db' => [
+		'host'  => 'localhost',
+		'user'  =>  'root',
+		'pass'  =>  '',
+		'dbname'=>  'flight_beers'
+	],
+	
+	/// Pagination defaults
+	'noPagination'          => 1000,    // limits the amount of records for a request without pagination
+	'defafaultPagination'   => 10,      // amount of records when only pageing is used in url-qsa
+	
+	/// JWT
+	'jwt' => (object) [
+		'token_due_days'    => $token_due_days,                            	// in days
+		'IssuedAT_claim'    => $now,                                        // now in seconds Unix-timestamp
+		'NotBeFore_claim'   => ($now +  10),                                // now + seconds later
+		'EXPire_claim'      => ($now + ($token_due_days * 24 * 60 * 60)), 	// amount of seconds after now
 		
-		/// Database mySql
-		'db' => [
-			'host'  => 'localhost',
-			'user'  =>  'root',
-			'pass'  =>  '',
-			'dbname'=>  'flight_beers'
-		],
-		
-		/// Pagination defaults
-		'noPagination'          => 1000,    // limits the amount of records for a request without pagination
-		'defafaultPagination'   => 10,      // amount of records when only pageing is used in url-qsa
-		
-		/// JWT
-		'jwt' => (object) [
-			'token_due_days'    => $token_due_days,                                                         // in days
-			'IssuedAT_claim'    => $now,                                                       // now in seconds Unix-timestamp
-			'NotBeFore_claim'   => ($now +  10),                                               // now + seconds later
-			'EXPire_claim'      => ($now + ($token_due_days * 24 * 60 * 60)), // amount of seconds after now
-			
-			'token_encrypt' => 'HS256',                              //   'HS256' || 'HS512'
-			'token_key' => 'MIIEowIBAAKCAQEAuzWHNM5f+amCjQztc5QTfJfzCC5J4nuW+L/aOxZ4f8J3Frew    // for generating a unique JWT
+		'token_encrypt' => 'HS256',                              			//   'HS256' || 'HS512'
+		// for generating a unique JWT																	
+		'token_key' => 'MIIEowIBAAKCAQEAuzWHNM5f+amCjQztc5QTfJfzCC5J4nuW+L/aOxZ4f8J3Frew    
 M2c/dufrnmedsApb0By7WhaHlcqCh/ScAPyJhzkPYLae7bTVro3hok0zDITR8F6S
 JGL42JAEUk+ILkPI+DONM0+3vzk6Kvfe548tu4czCuqU8BGVOlnp6IqBHhAswNMM
 78pos/2z0CjPM4tbeXqSTTbNkXRboxjU29vSopcT51koWOgiTf3C7nJUoMWZHZI5
@@ -59,6 +60,5 @@ DJ1BAoGBAJuPD27ErTSVtId90+M4zFPNibFP50KprVdc8CR37BE7r8vuGgNYXmnI
 RLnGP9p3pVgFCktORuYS2J/6t84I3+A17nEoB4xvhTLeAinAW/uTQOUmNicOP4Ek
 2MsLL2kHgL8bLTmvXV4FX+PXphrDKg1XxzOYn0otuoqdAQrkK4og',
 		],
-		
-	];
+];
 ?>

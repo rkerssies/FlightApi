@@ -125,22 +125,42 @@
 	Flight::route('POST /signin', function()
 	{
 		$validated = $this->requestValidation->validator((object)$this->request->post);
-		
-		if( ! $validated) // failed
+
+		$validUser = $this->jwtAuth->checkUser( $this->request->post);
+
+		if( ! $validated) // failed validation
 		{
 			$this->successResponse  = false;
 			$this->messageResponse  = 'NOT SIGNED IN, validation FAILED on signin-data';
 			$this->response->validation  = $this->requestValidation->fails;
 			$this->statusResponse  = 400;
+			return false;
 		}
-		else {
-			$this->dataResponse         = $this->jwtAuth->createToken( (array) $this->request->post);
+		elseif(!empty($this->jwtAuth->blocked) || !empty($this->jwtAuth->newpass))
+		{	
+			// blocked or new password
+			$this->dataResponse         = (object) ['token' =>null, 'email' =>$this->jwtAuth->email, 'name' => $this->jwtAuth->name, 'avatar'=> $this->jwtAuth->avatar];
 			$this->messageResponse      = $this->jwtAuth->messageResponse;
 			$this->statusResponse       = $this->jwtAuth->statusResponse;
 			$this->response->validation = $this->jwtAuth->validation;
-			$this->request->post->password = null;  // security: remove password from request
-			$this->response->count      = $this->jwtAuth->count;
+			$this->response->blocked 	= $this->jwtAuth->blocked | null;
+			$this->response->newpass 	= $this->jwtAuth->newpass | null;
+			$this->request->post->password = '*************';  // security: remove password from request
+			return false;
 		}
-		
+		elseif($validUser && $this->jwtAuth->blocked == false && $this->jwtAuth->newpass == false) 
+		{	
+			// valid user  -> provide token
+			$this->dataResponse         = (object) $this->jwtAuth->data;
+			$this->messageResponse      = $this->jwtAuth->messageResponse;
+			$this->statusResponse       = $this->jwtAuth->statusResponse;
+			$this->response->validation = $this->jwtAuth->validation;
+			$this->request->post->password = '*************';  // security: remove password from request
+
+			return true;
+		}
+
+		dd('missed');
+		return false;
 
 	});
