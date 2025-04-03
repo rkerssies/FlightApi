@@ -31,10 +31,14 @@
 		'user' => [         // role with its permissions (theme & action)
 			// auto-API on tables; routes/api.php
 			'beers'     => ['all','find'],
+			'beers'     => ['all','find'],
 			'brewers'   => ['all'],
 			'about'		=>['read'],
 			'tryout'	=> ['read'],
-			]
+		],
+		'visitor' => [
+			'password' => ['forgot', 'renew']					// is accessable for all users
+		]
 	];
 
 ?>

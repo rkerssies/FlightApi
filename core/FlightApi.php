@@ -37,7 +37,7 @@
 		private $page = null;
 		private $messageResponse = 'Request data NOT FOUND on url';
 		private $dataResponse = null;
-		private $statusResponse = 404;  //Not found
+		public $statusResponse = 404;  //Not found
 		
 		public function __construct()
 		{
@@ -133,7 +133,7 @@
 			include "../routes/api.php";                    // include and run all route-functions
 			Flight::map('notFound', function(){
 				// return 404 json-respons for non-existing url-requests
-				$this->error('Not Found', 404);
+				$this->error('Not Found', 40444666);
 			});
 
 			// create default json-headers, to enable CORS
@@ -163,10 +163,12 @@
 			Flight::start();                                // run Flight
 
 			$this->sendRespons();                           // return unified json-response
+
 		}
 		
 		private function sendRespons()
 		{
+			// setting a correct count on records 
 			if(!empty($this->dataResponse->token))   {	// requests for token | newpass | blocked
 				$this->response->count = 1;
 			}
@@ -174,15 +176,14 @@
 			{ 
 				$this->response->count = count($this->dataResponse); 
 			}
-			elseif($this->statusResponse == 400 || $this->statusResponse == 404
+			elseif($this->statusResponse == 400  || $this->statusResponse == 403 
+				|| $this->statusResponse == 404
 				|| $this->statusResponse == 412 || $this->statusResponse == 500) {
 				$this->response->count = 0;
 			}
 			else {
 				$this->response->count = 1;
 			}
-
-			
 			
 			Flight::json(
 			[

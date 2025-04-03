@@ -54,3 +54,28 @@
 		
 		return $result;
 	}
+
+
+	function make_hash($planetext_password)
+	{
+		return password_hash($planetext_password, PASSWORD_DEFAULT);
+	}
+
+	function check_hash($inputPassword, $hashedPasswordFromDB)
+	{
+		return password_verify($inputPassword, $hashedPasswordFromDB);
+	}
+
+	function make_crypt($planetext_password, $hashString='')
+	{
+		return crypt($planetext_password, '$6$'.base64_encode($planetext_password));
+	}
+
+	function check_crypt($planetext_password, $hashed_password)
+	{
+		if (crypt($planetext_password, '$6$'.base64_encode($planetext_password)) == $hashed_password) 
+		{ 
+			return true;
+		  } 
+		return false;
+	}

@@ -72,7 +72,7 @@ use \PDO;
 					$this->affectedRows = $stmt->rowCount();
 				}
 				$this->pdo->commit();
-
+				// $this->querySuccess = true;
 				return $result;
 			
 		}

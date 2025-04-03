@@ -7,11 +7,10 @@
 	 */
 	
 	/* *******************************************************
-	this file contains;
-		*   default-routes that do not require permissions
-	    *   API-requests 4 AUTH and TOKENS
+		this file contains;
+			*   default-routes that do not require permissions
+			*   API-requests 4 AUTH, TOKENS AND RenewPasswords
 	******************************************************* */
-	
 	
 	/*  HOME   */
 	Flight::route('/', function()
@@ -125,42 +124,99 @@
 	Flight::route('POST /signin', function()
 	{
 		$validated = $this->requestValidation->validator((object)$this->request->post);
+		$validUser = $this->jwtAuth->checkUser($this->request->post);
 
-		$validUser = $this->jwtAuth->checkUser( $this->request->post);
-
-		if( ! $validated) // failed validation
+		if( ! $validated) 	// form-input ok
 		{
-			$this->successResponse  = false;
-			$this->messageResponse  = 'NOT SIGNED IN, validation FAILED on signin-data';
+			// No valid useraccount
+			$this->successResponse  	= false;
+			$this->statusResponse  		= 403;
+			$this->messageResponse 	 	= 'NOT SIGNED IN, validation FAILED on signin-data';
 			$this->response->validation  = $this->requestValidation->fails;
-			$this->statusResponse  = 400;
-			return false;
-		}
-		elseif(!empty($this->jwtAuth->blocked) || !empty($this->jwtAuth->newpass))
-		{	
-			// blocked or new password
-			$this->dataResponse         = (object) ['token' =>null, 'email' =>$this->jwtAuth->email, 'name' => $this->jwtAuth->name, 'avatar'=> $this->jwtAuth->avatar];
-			$this->messageResponse      = $this->jwtAuth->messageResponse;
-			$this->statusResponse       = $this->jwtAuth->statusResponse;
-			$this->response->validation = $this->jwtAuth->validation;
-			$this->response->blocked 	= $this->jwtAuth->blocked | null;
-			$this->response->newpass 	= $this->jwtAuth->newpass | null;
 			$this->request->post->password = '*************';  // security: remove password from request
-			return false;
+
 		}
-		elseif($validUser && $this->jwtAuth->blocked == false && $this->jwtAuth->newpass == false) 
-		{	
-			// valid user  -> provide token
+		elseif( ! $validUser) 	// user not found 
+		{
+			// No valid useraccount
+			$this->successResponse  	= false;
+			$this->statusResponse  		= 403;
+			$this->messageResponse  	= $this->jwtAuth->messageResponse;
+			$this->response->validation  = $this->requestValidation->fails;
+		}
+		elseif(!empty($this->jwtAuth->blocked) && $this->jwtAuth->blocked != '0000-00-00 00:00:00' )
+		{	// blocked user	
+			$this->successResponse  	= false;
+			$this->statusResponse  		= 403;
+			$this->dataResponse         = $this->jwtAuth->data;
+			$this->messageResponse      = $this->jwtAuth->messageResponse;
+			$this->response->validation = $this->jwtAuth->validation;
+			$this->response->blocked 	= $this->jwtAuth->blocked;
+			$this->request->post->password = '*************';  // security: remove password from request
+
+		}
+		elseif($validUser &&  (empty($this->jwtAuth->blocked) || $this->jwtAuth->blocked == '0000-00-00 00:00:00') ) 
+		{	// valid user; provide token || force a new password
+			$this->successResponse  	= true;
+			$this->statusResponse  		= $this->jwtAuth->setStatusResponse;
 			$this->dataResponse         = (object) $this->jwtAuth->data;
 			$this->messageResponse      = $this->jwtAuth->messageResponse;
-			$this->statusResponse       = $this->jwtAuth->statusResponse;
 			$this->response->validation = $this->jwtAuth->validation;
+			$this->response->newpass 	= $this->jwtAuth->newpass;
 			$this->request->post->password = '*************';  // security: remove password from request
-
-			return true;
 		}
+	});
 
-		dd('missed');
-		return false;
+
+
+	Flight::route('PUT /newpassword', function()
+	{   
+		$cryptString = $this->config->app_key.str_replace(array(' ','&nbsp;'),'',$this->config->siteName);
+
+		$loginAccount = (object)['email' => $this->request->put->email, 'password' =>$this->request->put->oldPassword];
+		$validated = $this->requestValidation->validator((object)$loginAccount);
+		$validUser = $this->jwtAuth->checkUser( $loginAccount);
+
+		if(! $validUser)
+		{	//no valid user found
+			$this->request->put 		= $this->jwtAuth->data; // empty/clean-up
+			$this->messageResponse      = $this->jwtAuth->messageResponse;	
+			$this->meta->success       = $this->jwtAuth->setStatusResponse; 
+			$this->successResponse  	= $this->jwtAuth->successResponse;
+		}
+		elseif(! $this->jwtAuth->checkPermissions('password-renew'))
+		{  
+			$this->messageResponse      = 'Invalid permissions to change the password';
+			$this->statusResponse       = 403;  		// Forbidden, no valid access-rights/permissions
+		}
+		elseif($validUser == true && $validated == true)
+		{
+			$sql='UPDATE `users` SET `password` = "'.make_crypt($this->request->put->newPassword, $cryptString).'",
+			`newpass` = "0000-00-00 00:00:00",
+			`updated_at` = "'.date('Y-m-d H:i:s').'"
+			WHERE `email` = "'.$this->request->put->email.'" 
+			AND `password` = "'.make_crypt($this->request->put->oldPassword, $cryptString).'"
+			AND (`blocked` IS NULL OR `blocked` = "0000-00-00 00:00:00")';
+
+			$this->db->query($sql);	
+
+			if($this->db->querySuccess == true)
+			{	
+				$newPut = [
+							'email'			=> $this->request->put->email, 
+							'oldPassword' 	=> "************",
+							'newPassword' 	=> "*************",
+							'confirmPassword' => "*************",
+							];
+				$this->request->put 	= $newPut;
+				$this->messageResponse 	= 'renewed password';
+				$this->statusResponse  	= 200;
+				$this->successResponse 	= true;
+				$this->request->values['action'] = 'newpassword';
+			}
+			else	{
+				$this->error('NOT FOUND: no dataset found of bars and there totals', 404);
+			}
+		}
 
 	});
