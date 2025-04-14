@@ -19,9 +19,8 @@ use \PDO;
 		public $affected = 0;
 		public $lastInsert = null;
 		
-		public function __construct()
+		public function __construct($configDB)
 		{
-			$config = (object)(include("../config/app.php"))->db;
 			$attr = [
 				PDO::MYSQL_ATTR_FOUND_ROWS=>TRUE,
 				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -29,7 +28,7 @@ use \PDO;
 			];
 			if(empty($this->pdo))
 			{
-				$this->pdo=new \PDO('mysql:host='.$config->host.';dbname='.$config->dbname, $config->user, $config->pass, $attr);
+				$this->pdo=new \PDO('mysql:host='.$configDB->host.';dbname='.$configDB->dbname, $configDB->user, $configDB->pass, $attr);
 			}
 		}
 		

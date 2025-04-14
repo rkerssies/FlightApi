@@ -10,13 +10,19 @@
 	
 	namespace core;
 	
+	use Dotenv\Dotenv;
+
 	use core\cleanRequests;
 	use Flight;
 	use RecursiveArrayIterator;
 	use core\validation\FormRequests;
 	use Firebase\JWT\JWT;
 	use Firebase\JWT\Key;
-//	use pdoDB;
+
+	use PHPMailer\PHPMailer\PHPMailer;
+	use PHPMailer\PHPMailer\SMTP;
+	use PHPMailer\PHPMailer\Exception;
+
 	
 	
 	class FlightApi
@@ -30,6 +36,7 @@
 		private $host = null;
 		private $successResponse = false;
 		//private $lastInserted = null;
+		public $meta = null;
 		private $request = [];
 		private $response = [];
 		private $id = null;
@@ -41,36 +48,66 @@
 		
 		public function __construct()
 		{
+			require_once '../core/helperFunctions.php';
 //			global $_PUT;
 //			global $_PATCH;
 //			global $_DELETE;
 //			$_PUT    = [];
 //			$_PATCH  = [];
 //			$_DELETE = [];
-			require_once '../vendor/mikecao/flight/flight/Flight.php';
-			require_once '../vendor/mikecao/flight/flight/autoload.php';
-			include '../vendor/firebase/php-jwt/src/JWT.php';
-			include '../vendor/firebase/php-jwt/src/Key.php';
-			include '../vendor/firebase/php-jwt/src/JWTExceptionWithPayloadInterface.php';
-			include '../vendor/firebase/php-jwt/src/SignatureInvalidException.php';
-			include '../vendor/firebase/php-jwt/src/ExpiredException.php';
-			include '../vendor/firebase/php-jwt/src/BeforeValidException.php';
+
+			require '../vendor/autoload.php';   // all files of vendor-packages are read
+
+			// use .env - file merged with config
+			$dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+			$dotenv->load();
+			$this->config =  include "../config/app.php";    // get config
+				
+			$this->config->jwt->token_key = file_get_contents('../.app_key');	// for generating a unique JWT	
+			$this->config->db=  (object) [
+				'host' => $_ENV['DB_HOST'],
+				'port' => $_ENV['DB_PORT'],
+				'dbname' => $_ENV['DB_NAME'],
+				'user' => $_ENV['DB_USER'],
+				'pass' => $_ENV['DB_PASS'],
+			];
+			$this->config->smtp = (object) [
+				'host' => $_ENV['SMTP_HOST'],
+				'port' => $_ENV['SMTP_PORT'],
+				'user' => $_ENV['SMTP_USER'],
+				'pass' => $_ENV['SMTP_PASS'],
+				'tls'  => $_ENV['SMTP_TLS'],
+				'no_reply'=> $_ENV['SMTP_NOREPLY'],
+				'info' => $_ENV['SMTP_INFO'],
+			];
+			////
+			// require_once '../vendor/mikecao/flight/flight/Flight.php';
+			// require_once '../vendor/mikecao/flight/flight/autoload.php';
+			// include '../vendor/firebase/php-jwt/src/JWT.php';
+			// include '../vendor/firebase/php-jwt/src/Key.php';
+			// include '../vendor/firebase/php-jwt/src/JWTExceptionWithPayloadInterface.php';
+			// include '../vendor/firebase/php-jwt/src/SignatureInvalidException.php';
+			// include '../vendor/firebase/php-jwt/src/ExpiredException.php';
+			// include '../vendor/firebase/php-jwt/src/BeforeValidException.php';
 
 			include '../core/jwtAuth.php';
-			require_once '../core/helperFunctions.php';
 			require_once '../core/cleanRequests.php';
 			require_once "../core/pdoDB.php";
 			require_once "../core/validation/ValidationPatterns.php";
 			require_once "../core/validation/FormRequests.php";
 	
+
+			date_default_timezone_set($this->config->time_zone);
+			
 			// pdo database-object
-			$this->config =  include "../config/app.php";    // get config
-			$this->db = (new pdoDB());                      // database object
+			$this->db = (new pdoDB($this->config->db));                      // database object
 			
 			$pathParts = explode('?',Flight::request()->url);
 			$this->host = isset($_SERVER["HTTPS"]) ? 'https'.'://' : 'http' .'://'.$_SERVER['HTTP_HOST'];
 			// JWT object
 			$this->jwtAuth = new jwtAuth($this->config->jwt, $this->db, $this->host.Flight::request()->url);
+
+/// get token en check dueDate ::: $this->jwtAuth->validateDue();
 
 			// some default get-values from request (via Flight)
 			$this->id       = Flight::request()->query['id'];   // get-value from URL
@@ -79,6 +116,7 @@
 	
 			$this->request  = (object) [];
 			$this->response = (object) [];
+			$this->meta 	= (object)[];
 			
 			// build response of get and  post AND-OR put, patch or delete
 			$cleanRequests = new cleanRequests();
@@ -137,14 +175,11 @@
 			});
 
 			// create default json-headers, to enable CORS
-//			header("Access-Control-Allow-Origin: ".$this->host );
 			header("Access-Control-Allow-Origin: *");       // allow all remote domains
 			header("Created-by: ".'InCubics.net (c)'.date('Y')."-".(date('Y')+1) );
-//			header("Access-Control-Allow-Methods: *");
-			header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE, PATCH");
-//			header("Access-Control-Max-Age: 3600");
-			header('Access-Control-Allow-Headers: Content-Type, Authorization');
-			
+
+			header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE, PATCH"); // or Access-Control-Allow-Methods: * 
+//			header("Access-Control-Max-Age: 3600");			
 			header("Access-Control-Allow-Credentials: true");
 			header("Content-type: application/json");
 			header("Access-Control-Allow-Headers: Content-Type, Accept, Origin, Access-Control-Allow-Headers,Authorization, Authentication, X-Requested-With");
@@ -160,10 +195,11 @@
 				exit();
 			}
 
+
+			
 			Flight::start();                                // run Flight
 
 			$this->sendRespons();                           // return unified json-response
-
 		}
 		
 		private function sendRespons()

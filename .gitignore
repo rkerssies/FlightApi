@@ -1,5 +1,7 @@
 .idea
 .DS_Store
+.env
+.app_key
 /config/*.key
 /vendor
 core/logs

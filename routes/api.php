@@ -28,10 +28,10 @@
 			$this->statusResponse       = 403;  // Forbidden, no valid access-rights/permissions
 		}
 		elseif(!$this->db->tableExists($table)){
-			$this->dataResponse = false;
-			$this->statusResponse = 412;
-			$this->messageResponse = 'table-name is incorrect or unknown; '.$table;
-			$this->response->validation  = ['tablename' => 'unknonw', 'table' => $table];
+			$this->dataResponse 		= false;
+			$this->statusResponse 		= 412;
+			$this->messageResponse 		= 'table-name is incorrect or unknown; '.$table;
+			$this->response->validation = ['tablename' => 'unknonw', 'table' => $table];
 		}
 		else    {
 			if(!empty($jwtObj->jwtSuccess)) { $this->response->token_payload  = $jwtObj->jwtSuccess; }
@@ -262,7 +262,7 @@
 				
 				// set current dat-time in updated_at when updating
 				if( (bool) $this->db->query('SELECT count(`TABLE_NAME`)as count FROM INFORMATION_SCHEMA.COLUMNS
-                                   WHERE TABLE_SCHEMA = "'.$this->config->db['dbname'].'" AND TABLE_NAME = "'.$table.'" AND COLUMN_NAME ="updated_at"')[0]['count'])
+                                   WHERE TABLE_SCHEMA = "'.$this->config->db->dbname.'" AND TABLE_NAME = "'.$table.'" AND COLUMN_NAME ="updated_at"')[0]['count'])
 				{ // column updated_at  found, set current date-time
 					$dateTime = date('Y-m-d H:i:s');
 					$setString.="`updated_at`= '".$dateTime."', ";
@@ -372,7 +372,7 @@
 		else    {
 			if(!empty($jwtObj->jwtSuccess)) { $this->response->token_payload  = $jwtObj->jwtSuccess; }
 			if( ! (bool) $this->db->query('SELECT count(`TABLE_NAME`)as count FROM INFORMATION_SCHEMA.COLUMNS
-                                   WHERE TABLE_SCHEMA = "'.$this->config->db['dbname'].'" AND TABLE_NAME = "'.$table.'" AND COLUMN_NAME ="deleted_at"')[0]['count'])
+                                   WHERE TABLE_SCHEMA = "'.$this->config->db->dbname.'" AND TABLE_NAME = "'.$table.'" AND COLUMN_NAME ="deleted_at"')[0]['count'])
 			{ // column deleted_at not found, no soft-deletion support
 				$this->dataResponse     = false;
 				$this->successResponse  = false;
@@ -429,7 +429,7 @@
 		else    {
 			if(!empty($jwtObj->jwtSuccess)) { $this->response->token_payload  = $jwtObj->jwtSuccess; }
 			if( ! (bool) $this->db->query('SELECT count(`TABLE_NAME`)as count FROM INFORMATION_SCHEMA.COLUMNS
-                                   WHERE TABLE_SCHEMA = "'.$this->config->db['dbname'].'" AND TABLE_NAME = "'.$table.'" AND COLUMN_NAME ="deleted_at"')[0]['count'])
+                                   WHERE TABLE_SCHEMA = "'.$this->config->db->dbname.'" AND TABLE_NAME = "'.$table.'" AND COLUMN_NAME ="deleted_at"')[0]['count'])
 			{ // column deleted_at not found, no soft-deletion support
 				$this->dataResponse     = false;
 				$this->successResponse  = false;
