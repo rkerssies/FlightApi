@@ -52,6 +52,17 @@ NB: the 'users'-table should exist and contain a field 'roles' for access with r
       
     ‼️ Keep the structure of the array, only change the values
 
+* Note that the filesize upload for PHP and BLOB storage for MySQL. must be 256MB. The SQL-exportfiles contain large blob-images.
+	1. Change parts for PHP in xampp/php/php.ini || /Applications/XAMPP/xamppfiles/etc/php.ini to:
+		* mupload_max_filesize = 128M
+		* post_max_size = 128M
+		* memory_limit = 256M
+	2. Change parts for MySql in xampp/mysql/my.ini || /Applications/XAMPP/xamppfiles/etc/my.cnf to:
+		* max_allowed_packet = 256M
+		* innodb_log_file_size = 256M
+
+
+
 ## How it works
 
 ### Methods and url-paths
